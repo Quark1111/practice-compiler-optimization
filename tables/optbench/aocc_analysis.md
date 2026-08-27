@@ -10,7 +10,7 @@ clang-17 -S -O2 -DNO_ZERO_DIVIDE source/optbench/optbench.c -o assembler/optbenc
 # Размножение констант и копий
 
 | Исходный код| AOCC_O0| AOCC_O2 | Вывод |
-|------------------------------|
+|---|---|---|---|
 | j4 = 2;<br>printf("%d", j4);<br>if (i2 < j4 && i4 < j4) {<br>&nbsp;&nbsp;&nbsp;&nbsp;i2 = 2;<br>&nbsp;&nbsp;&nbsp;&nbsp;printf("%d", i2);<br>} | `movl $2, j4(%rip)`<br>`movl j4(%rip), %esi`<br>`callq printf@PLT`<br>`movl i2(%rip), %eax`<br>`cmpl j4(%rip), %eax`<br>`jge .LBB0_3`<br>...<br>`movl i2(%rip), %esi` | `movl $2, j4(%rip)`<br>`movl $2, %esi`<br>`callq printf@PLT`<br>`movl i2(%rip), %r14d`<br>`cmpl $1, %r14d`<br>`jg .LBB0_3`<br>...<br>`movl $2, %esi` | в O2 вместо загрузки `j4` и `i2` из памяти в `printf` передаётся константа `$2`. Сравнение `i2 < 2` заменено эквивалентным `i2 <= 1` через `cmpl $1`/`jg`. |
  
 
